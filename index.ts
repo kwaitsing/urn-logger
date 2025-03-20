@@ -1,5 +1,6 @@
 import Elysia from "elysia";
 import { avaProfile } from "./profile";
+import type { FileSink } from "bun";
 
 interface Config {
     profile?: 'greencomb'
@@ -14,9 +15,18 @@ export const urnLogger = (cfg: Config) => {
         profile: cfg.profile ? cfg.profile : 'greencomb'
     };
 
+    let logWritter: FileSink
+
+    if (config.filePath) {
+        const file = Bun.file(config.filePath);
+        logWritter = file.writer();
+    }
+
     const log = (msg: string) => {
         if (config.filePath) {
-            Bun.write(config.filePath, msg)
+            if (!logWritter) throw new Error("Unable to find FileSink when trying to logging");
+            logWritter.write(`${msg}\n`)
+            logWritter.flush()
         } else {
             console.log(msg)
         }
@@ -29,14 +39,15 @@ export const urnLogger = (cfg: Config) => {
             name: 'urn-logger'
         })
             .state('req_timeStart', 0n)
-            .onRequest(({ store, request }) => {
+            .onRequest(({ store }) => {
                 store.req_timeStart = process.hrtime.bigint();
             })
-            .onAfterResponse({ as: 'global' }, ctx => {
+            .onAfterHandle({ as: 'global' }, ctx => {
                 const profile = printer({
                     startTime: ctx.store.req_timeStart,
                     method: ctx.request.method,
-                    path: ctx.path
+                    path: ctx.path,
+                    isDebug: config.isDebug
                 })[0]()
                 log(profile)
             })
@@ -44,7 +55,10 @@ export const urnLogger = (cfg: Config) => {
                 const profile = printer({
                     startTime: ctx.store.req_timeStart,
                     method: ctx.request.method,
-                    path: ctx.path
+                    isDebug: config.isDebug,
+                    path: ctx.path,
+                    //@ts-ignore
+                    errMsg: ctx.error.msg
                 })[1]()
                 log(profile)
             })

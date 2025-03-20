@@ -7,8 +7,13 @@ export const greencomb = (c: ProfileArgs) => {
 
     const template = (code: number) => {
         const dateTime = chalk.bgGray(getDateTimeString(new Date()));
-        const methodPath = code === 0 ? chalk.bgGreen(`${c.method}`) + ` ${c.path}` : chalk.bgRed(`${c.method}`) + ` ${c.path}`;
-        return `${dateTime} ${methodPath} ${duration}μs`;
+        const method = code === 0 ? chalk.bgGreen(`${c.method}`) : chalk.bgRed(`${c.method}`);
+        if (c.isDebug) {
+            const debugTag = chalk.bgYellow('DEBUG')
+            return `${debugTag} ${dateTime} ${method} ${c.path} ${duration}μs | ${c.errMsg}`
+        } else {
+            return `${dateTime} ${method} ${c.path} ${duration}μs`
+        }
     }
 
     return {

@@ -5,6 +5,8 @@ export interface ProfileArgs {
     startTime: bigint
     method: HTTPMethod
     path: string
+    isDebug: boolean
+    errMsg?: string
 }
 
 export const avaProfile = {
