@@ -50,7 +50,6 @@ export const urnLogger = (cfg: Config) => {
                     isDebug: config.isDebug
                 })[0]()
                 log(profile)
-                return
             })
             .onError({ as: 'global' }, ctx => {
                 const profile = printer({
@@ -62,7 +61,6 @@ export const urnLogger = (cfg: Config) => {
                     errMsg: `${ctx.error}`
                 })[1]()
                 log(profile)
-                return `${ctx.error}`
             })
     }
 }
