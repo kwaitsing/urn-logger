@@ -7,35 +7,24 @@ interface Config {
     isDebug?: boolean
 }
 
-interface InternalConfig extends Config {
-    profile: 'greencomb'
-    isDebug: boolean
-}
+export const urnLogger = (cfg: Config) => {
+    const config = {
+        ...cfg,
+        isDebug: cfg.isDebug === undefined ? false : cfg.isDebug,
+        profile: cfg.profile ? cfg.profile : 'greencomb'
+    };
 
-export class UrnLogger {
-
-    cfg: InternalConfig
-    profile: (c: ProfileArgs) => ProfileReturn
-
-    constructor(cfg: Config) {
-        this.cfg = {
-            ...cfg,
-            isDebug: cfg.isDebug === undefined ? false : cfg.isDebug,
-            profile: cfg.profile ? cfg.profile : 'greencomb'
-        };
-
-        this.profile = avaProfile[this.cfg.profile]
-    }
-
-    log(msg: string) {
-        if (this.cfg.filePath) {
-            Bun.write(this.cfg.filePath, msg)
+    const log = (msg: string) => {
+        if (config.filePath) {
+            Bun.write(config.filePath, msg)
         } else {
             console.log(msg)
         }
     }
 
-    instance() {
+    const printer = avaProfile[config.profile]
+
+    return () => {
         return new Elysia({
             name: 'urn-logger'
         })
@@ -44,20 +33,20 @@ export class UrnLogger {
                 store.req_timeStart = process.hrtime.bigint();
             })
             .onAfterResponse({ as: 'global' }, ctx => {
-                const profile = this.profile({
+                const profile = printer({
                     startTime: ctx.store.req_timeStart,
                     method: ctx.request.method,
                     path: ctx.path
                 })[0]()
-                this.log(profile)
+                log(profile)
             })
             .onError({ as: 'global' }, ctx => {
-                const profile = this.profile({
+                const profile = printer({
                     startTime: ctx.store.req_timeStart,
                     method: ctx.request.method,
                     path: ctx.path
                 })[1]()
-                this.log(profile)
+                log(profile)
             })
     }
 }
