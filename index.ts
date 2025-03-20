@@ -1,5 +1,5 @@
 import Elysia from "elysia";
-import { avaProfile, type ProfileArgs, type ProfileReturn } from "./profile";
+import { avaProfile } from "./profile";
 
 interface Config {
     profile?: 'greencomb'
