@@ -10,7 +10,8 @@ export const greencomb = (c: ProfileArgs) => {
         const method = code === 0 ? chalk.bgGreen(`${c.method}`) : chalk.bgRed(`${c.method}`);
         if (c.isDebug) {
             const debugTag = chalk.bgYellow('DEBUG')
-            return `${debugTag} ${dateTime} ${method} ${c.path} ${duration}μs | ${c.errMsg}`
+            const debugMsg = c.errMsg ? ` | ${c.errMsg}` : ''
+            return `${debugTag} ${dateTime} ${method} ${c.path} ${duration}μs${debugMsg}`
         } else {
             return `${dateTime} ${method} ${c.path} ${duration}μs`
         }

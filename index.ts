@@ -58,7 +58,7 @@ export const urnLogger = (cfg: Config) => {
                     isDebug: config.isDebug,
                     path: ctx.path,
                     //@ts-ignore
-                    errMsg: ctx.error.msg
+                    errMsg: `${ctx.error}`
                 })[1]()
                 log(profile)
             })
